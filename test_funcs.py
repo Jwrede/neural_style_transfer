@@ -14,7 +14,7 @@ from torch.utils.data import Dataset, DataLoader
 import torchvision
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-net = Net(vgg, decoder)
+net = Net(vgg, decoder).to(device)
 
 net.load_state_dict(torch.load("model_checkpoint.pt", map_location=device)['state_dict'])
 
