@@ -61,7 +61,7 @@ import imageio
 import imageio_ffmpeg
 from tqdm import tqdm
 
-def style_video(video_path, output_name, style, alpha = 1.0, preserve_color = False, custom_resolution = None):
+def style_video(video_path, style, output_name = None, alpha = 1.0, preserve_color = False, custom_resolution = None):
   toTensor = ToTensor()
 
   reader = imageio.get_reader(video_path)
