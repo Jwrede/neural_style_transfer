@@ -115,8 +115,4 @@ def style_video(video_path, output_name, style, alpha = 1.0, preserve_color = Fa
   writer.send(None)  # seed the generator
   for frame in driving_video:
     writer.send(frame)
-  writer.close() 
-  
-  cap.release()
-  out.release()
-  cv2.destroyAllWindows()
+  writer.close()
