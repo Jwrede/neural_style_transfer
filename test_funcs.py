@@ -57,30 +57,6 @@ def test(content, style, alpha = 1.0, plot = True, encode = True):
       return
     return result
 
-def matrix_power(x,second = False):
-  A, U = np.linalg.eig(x)
-  if(second):
-    return U @ np.linalg.inv(np.diag(A) ** (1/2)) @ U.T
-  return U @ np.diag(A)**(1/2) @ U.T
-
-def preserve_color(content, style):
-  content_mean = np.mean(content, axis = (0,1))
-  style_mean = np.mean(style, axis = (0,1))
-
-  content_flattened = content.reshape(content.shape[0]*content.shape[1], 3)
-  style_flattened = style.reshape(content.shape[0]*content.shape[1], 3)
-
-  content_covariance = np.cov(content_flattened, rowvar = False)
-  style_covariance = np.cov(style_flattened, rowvar = False)
-
-  A = matrix_power(content_covariance) @ matrix_power(style_covariance, True)
-  b = content_mean - (A @ style_mean)
-
-  new_style = style_flattened @ A + b
-  new_style = new_style.reshape(content.shape[0], content.shape[1], 3)
-  
-  return new_style
-
 def rgb_to_yiq(image):
   return image @ np.array([[0.299,0.587,0.114],[0.59590059,-0.27455667,-0.32134392],[0.21153661, -0.52273617, 0.31119955]])
 

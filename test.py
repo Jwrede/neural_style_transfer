@@ -2,26 +2,18 @@ import torch
 from test_funcs import *
 import cv2
 
-def style_image(content, style, alpha = 1.0, plot = True,  color = None):
-  if color == "preserve color 2":
+def style_image(content, style, alpha = 1.0, plot = True,  preserve_color = False):
+  if preserve_color:
     result = test(content, style, alpha, plot = False)
     result = preserve_color_stable(content, result)
     if plot:
       plot_data([content, style, result])
-    else:
-      return result
-
-  elif color == "preserve color 1":
-    result = preserve_color(content, style)
-    result = test(content, result, alpha)
-    if not plot:
-      return result
+    return result
   else:
     result = test(content, style, alpha, plot)
-    if not plot:
-      return result
+    return result
 
-def style_interpolation(content, styles, weights, alpha = 1.0, plot = True, color = None):
+def style_interpolation(content, styles, weights, alpha = 1.0, plot = True, preserve_color = False):
   assert len(styles) == len(weights)
   assert sum(weights) > 0.99 and sum(weights) < 1.01
   assert [True for i in styles if i.shape == content.shape]
@@ -33,8 +25,6 @@ def style_interpolation(content, styles, weights, alpha = 1.0, plot = True, colo
     x = net.encode(x)
 
     for i,style in enumerate(styles):
-      if color == "preserve color 1":
-        style = preserve_color(content, style)
       styles[i] = torch.tensor(np.expand_dims(toTensor(style),0)).float().to(device)
 
     for i,y in enumerate(styles):
@@ -45,18 +35,17 @@ def style_interpolation(content, styles, weights, alpha = 1.0, plot = True, colo
   result = torch.cat(styles)
   result = torch.sum(result, dim = 0, keepdims=True)
 
-  if color == "preserve color 2":
+  if :
     if plot:
       result = test(content, style, alpha, plot = False)
       result = preserve_color_stable(content, result)
     else:
       result = test(content, style, alpha, plot = False)
-      return preserve_color_stable(content, result)
+    return preserve_color_stable(content, result)
   else:
     if plot:
       result = test(content, result, alpha, plot = False, encode = False)
-    else:
-      return test(content, result, alpha, plot = False, encode = False)
+    return test(content, result, alpha, plot = False, encode = False)
   
   plot_data([content, result])
 
@@ -66,39 +55,43 @@ styles = [transform.resize(plt.imread(f"style{i}.jpg"), content.shape[:-1]) for 
 weights = [1/K for i in range(K)]
 style_interpolation(content, styles, weights, color = "preserve color 2")'''
 
-def style_video(video_path, output_name, style, alpha = 1.0, color = None):
-  cap = cv2.VideoCapture(video_path)
-  frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-  fps = int(cap.get(cv2.CAP_PROP_FPS))
-  frame_number = 0
-  frame_width = int( cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-  frame_height =int( cap.get( cv2.CAP_PROP_FRAME_HEIGHT))
-  resolution = (frame_height, frame_width)
+import imageio
+import imageio_ffmpeg
+from tqdm import tqdm
 
+def style_video(video_path, output_name, style, alpha = 1.0, preserve_color = False, custom_resolution = None):
   toTensor = ToTensor()
 
-  net.to(device)
+  reader = imageio.get_reader(video_path)
+  resolution = None
+
+  if custom_resolution is None:
+    resolution = reader.get_meta_data()["source_size"]
+  else:
+    resolution = custom_resolution
+  fps = reader.get_meta_data()["fps"]
 
   style = transform.resize(style,resolution)
   
-  if color not in ["preserve color 1", "preserve color 2"]:
+  if not preserve_color:
     style_tensor = torch.tensor(np.expand_dims(toTensor(style), 0)).float().to(device)
     style_tensor = net.encode(style_tensor)
-
-  fourcc = cv2.VideoWriter_fourcc(*'XVID')
   
-  out = cv2.VideoWriter(f"{output_name}.mp4", fourcc, fps, (frame_width, frame_height), isColor = True)
-
-  while frame_number < frame_count:
-    cap.set(fps, frame_number)
-    success, content = cap.read()
-    content = content.astype(float)/255
-    if success:
-      if color in ["preserve color 1", "preserve color 2"]:
-        if color == "preserve color 1":
-          style_tensor = preserve_color(content, style)
-        elif color == "preserve color 2":
-          style_tensor = preserve_color_stable(content, style)
+  frame_number = 0
+  driving_video = []
+  for frame_number in tqdm(range(reader.get_meta_data()['nframes'])):
+    try:
+      content = reader.get_next_data()
+    except imageio.core.CannotReadFrameError:
+      break
+    except IndexError:
+      break
+    else:
+      if custom_resolution is not None:
+        content = transform.resize(content, list(resolution)[::-1])
+      content = content.astype(float)/255
+      if preserve_color:
+        style_tensor = preserve_color_stable(content, style)
         style_tensor = torch.tensor(np.expand_dims(toTensor(style_tensor), 0)).float().to(device)
         style_tensor = net.encode(style_tensor)
 
@@ -108,11 +101,19 @@ def style_video(video_path, output_name, style, alpha = 1.0, color = None):
       result = (1-alpha) * x + alpha * result
       result = test(content, result, alpha, False, False)
       result = cv2.convertScaleAbs(result*255)
-      out.write(result)
-      print(f"{frame_number+1} of {frame_count}")
-      frame_number += 1
-    else:
-      print("conversion failed!")
+      driving_video.append(result)
+  reader.close()
+  
+  if output_name == None:
+    return driving_video
+
+  writer = imageio_ffmpeg.write_frames(f'{output_name}.mp4',
+                                       (resolution), fps = fps,
+                                       macro_block_size=1)
+  writer.send(None)  # seed the generator
+  for frame in driving_video:
+    writer.send(frame)
+  writer.close() 
   
   cap.release()
   out.release()
