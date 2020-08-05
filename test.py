@@ -35,25 +35,27 @@ def style_interpolation(content, styles, weights, alpha = 1.0, plot = True, pres
   result = torch.cat(styles)
   result = torch.sum(result, dim = 0, keepdims=True)
 
-  if :
+  if preserve_color:
     if plot:
       result = test(content, style, alpha, plot = False)
       result = preserve_color_stable(content, result)
     else:
       result = test(content, style, alpha, plot = False)
-    return preserve_color_stable(content, result)
+      return preserve_color_stable(content, result)
   else:
     if plot:
       result = test(content, result, alpha, plot = False, encode = False)
-    return test(content, result, alpha, plot = False, encode = False)
+    else:
+      return test(content, result, alpha, plot = False, encode = False)
   
   plot_data([content, result])
+  return result
 
 
 '''K = 7
 styles = [transform.resize(plt.imread(f"style{i}.jpg"), content.shape[:-1]) for i in range(1,K+1)]
 weights = [1/K for i in range(K)]
-style_interpolation(content, styles, weights, color = "preserve color 2")'''
+style_interpolation(content, styles, weights, plot = False, preserve_color = True)'''
 
 import imageio
 import imageio_ffmpeg

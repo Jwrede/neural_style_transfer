@@ -54,7 +54,6 @@ def test(content, style, alpha = 1.0, plot = True, encode = True):
     result = result[0].to("cpu").numpy().transpose((1, 2, 0)).reshape(content.shape)
     if plot:
       plot_data([content, style, result])
-      return
     return result
 
 def rgb_to_yiq(image):
