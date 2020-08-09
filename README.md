@@ -4,5 +4,20 @@ In this Repo I implemented the paper "Arbitrary Style Transfer in Real-time with
 
 The colab Notebook can be found here: https://colab.research.google.com/drive/1-7E5haL8VhaajmUXBlpR7ynH8Ge7ywjR#scrollTo=YLa2rTxLUxAF  
 
-Example pictures:
+## Example pictures:
+![](Examples/picture1lowres.png)  
 
+## Example pictures:
+![](Examples/picture1keepcolor.png)  
+
+## Example pictures:
+![](Examples/picture1loweralpha.png)  
+
+## Example pictures:
+![](Examples/picture3lowres.png)
+
+## Example pictures:
+![](Examples/picture3keepcolor.png)
+
+## Example video:
+![](Examples/outputGIF.gif)
