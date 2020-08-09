@@ -5,4 +5,4 @@ In this Repo I implemented the paper "Arbitrary Style Transfer in Real-time with
 The colab Notebook can be found here: https://colab.research.google.com/drive/1-7E5haL8VhaajmUXBlpR7ynH8Ge7ywjR#scrollTo=YLa2rTxLUxAF  
 
 Example pictures:
-
+![Picture](Examples/picture1.PNG)
