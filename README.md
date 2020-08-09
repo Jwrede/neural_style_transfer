@@ -6,9 +6,12 @@ The colab Notebook can be found here: https://colab.research.google.com/drive/1-
 
 Example pictures:
 ![](Examples/picture1lowres.png)  
+
 Example pictures:
-![](Examples/picture2lowres.png)  
+![](Examples/picture1keepcolor.png)  
+
 Example pictures:
-![](Examples/picture3lowres.png)  
+![](Examples/picture1loweralpha.png)  
+
 Example pictures:
-![](Examples/picture1loweralpha.png)
+![](Examples/picture3.png)
