@@ -91,7 +91,8 @@ def style_video(video_path, style, output_name = None, alpha = 1.0, preserve_col
     else:
       if custom_resolution is not None:
         content = transform.resize(content, list(resolution)[::-1])
-      content = content.astype(float)/255
+      else:
+        content = content.astype(float)/255
       if preserve_color:
         style_tensor = preserve_color_stable(content, style)
         style_tensor = torch.tensor(np.expand_dims(toTensor(style_tensor), 0)).float().to(device)
